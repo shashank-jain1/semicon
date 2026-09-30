@@ -1,4 +1,4 @@
-/* SFA Global — admin panel (vanilla JS, no build step) */
+/* SFA Semicon — admin panel (vanilla JS, no build step) */
 (() => {
   // ---------- Tiny DOM helpers ----------
   const $ = (s, r = document) => r.querySelector(s);
@@ -150,7 +150,7 @@
     el('div', { class: 'field' }, el('label', {}, 'Password'), p),
     btn, err);
     app.replaceChildren(el('div', { class: 'login' }, el('div', { class: 'login__card' },
-      el('img', { class: 'login__logo', src: '/assets/img/sfa-logo.png', alt: 'SFA' }),
+      el('div', { class: 'login__logo' }, el('img', { src: '/assets/img/sfa-mark.png', alt: '' }), el('b', {}, 'SFA SEMICON')),
       el('h1', {}, 'Website admin'),
       el('p', { class: 'sub' }, 'Sign in to edit your website content.'),
       form)));
@@ -175,7 +175,7 @@
     const link = (href, icon, label, key, badge) => el('a', { class: `side__link${active === key ? ' is-active' : ''}`, href }, ui(icon), label, badge ? el('span', { class: 'side__badge' }, badge) : null);
     const wrap = el('div', { class: 'shell' });
     const side = el('aside', { class: 'side' },
-      el('a', { class: 'side__logo', href: '#/dashboard' }, el('img', { src: '/assets/img/sfa-logo.png', alt: 'SFA' }), el('span', {}, 'Admin')),
+      el('a', { class: 'side__logo', href: '#/dashboard' }, el('img', { src: '/assets/img/sfa-mark.png', alt: '' }), el('b', {}, 'SFA SEMICON'), el('span', {}, 'Admin')),
       link('#/dashboard', 'dashboard', 'Dashboard', 'dashboard'),
       link('#/pages', 'pages', 'Pages & sections', 'pages'),
       link('#/settings', 'settings', 'Site settings', 'settings'),

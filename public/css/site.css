@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SFA Global — site styles
+   SFA Semicon — site styles
    ========================================================================== */
 
 @property --ang { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
@@ -155,6 +155,10 @@ body.is-scrolled .hdr { top: 0; background: rgba(4, 6, 11, .72); backdrop-filter
 .logo__core { animation: corePulse 2.4s ease-in-out infinite; transform-origin: 20px 20px; }
 @keyframes corePulse { 50% { opacity: .55; transform: scale(.8); } }
 .logo__img { height: 40px; width: auto; }
+.logo__markimg { height: 34px; width: auto; transition: transform .6s var(--ease); }
+.logo:hover .logo__markimg { transform: rotate(-12deg) scale(1.06); }
+.footer .logo__markimg { height: 40px; }
+.footer .logo { font-size: 17px; }
 .footer .logo__img { height: 46px; }
 .nav { display: flex; gap: 4px; margin-left: auto; }
 .nav__link { position: relative; margin: 0 13px; height: 22px; line-height: 22px; font-size: 14.5px; color: var(--muted); transition: color .3s; overflow: hidden; }

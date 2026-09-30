@@ -330,6 +330,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n  SFA Global website running →  http://localhost:${PORT}`);
+  console.log(`\n  SFA Semicon website running →  http://localhost:${PORT}`);
   console.log(`  Admin panel               →  http://localhost:${PORT}/admin\n`);
 });

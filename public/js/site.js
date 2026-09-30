@@ -1,4 +1,4 @@
-/* SFA Global — site interactions & scroll animations */
+/* SFA Semicon — site interactions & scroll animations */
 (() => {
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));

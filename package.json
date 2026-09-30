@@ -1,13 +1,13 @@
 {
-  "name": "sfa-global-website",
+  "name": "sfa-semicon-website",
   "version": "1.0.0",
-  "description": "SFA Global — animated semiconductor company website with admin CMS",
+  "description": "SFA Semicon — animated semiconductor company website with admin CMS",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
-  "author": "SFA Global",
+  "author": "SFA Semicon",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "compression": "^1.8.2",

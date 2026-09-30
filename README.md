@@ -1,6 +1,6 @@
-# SFA Global — website + admin CMS
+# SFA Semicon — website + admin CMS
 
-An animated website for SFA Global's semiconductor / AI-silicon business, with a built-in
+An animated website for SFA Semicon's semiconductor / AI-silicon business, with a built-in
 admin panel where every piece of content can be edited, reordered, hidden or added.
 
 ## Run it
