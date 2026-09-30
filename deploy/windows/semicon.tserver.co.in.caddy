@@ -1,0 +1,20 @@
+# SFA Semicon website — add this block to the Caddyfile on the server
+# (or `import` this file from it), then reload Caddy.
+# Caddy obtains and renews the HTTPS certificate for the domain automatically.
+
+semicon.tserver.co.in {
+	encode zstd gzip
+
+	# Admin uploads are capped at 10 MB by the app; allow a little headroom.
+	request_body {
+		max_size 12MB
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	# The Node app runs as the "sfa-semicon" Windows service on localhost only.
+	reverse_proxy 127.0.0.1:4400
+}

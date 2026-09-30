@@ -15,6 +15,9 @@ const { SECTION_TYPES, SETTINGS_SCHEMA } = require('./lib/schemas');
 const { uid, defaultSettings, defaultPages, sectionSamples } = require('./lib/defaults');
 
 const PORT = Number(process.env.PORT) || 4400;
+// Behind a reverse proxy (Caddy) set HOST=127.0.0.1 so the app is not reachable directly.
+const HOST = process.env.HOST || '0.0.0.0';
+const PROD = process.env.NODE_ENV === 'production';
 const UPLOAD_DIR = path.join(db.DATA_DIR, 'uploads');
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 db.load();
@@ -38,8 +41,19 @@ app.use((req, res, next) => {
 });
 
 // ---------- Static assets ----------
-const staticOpts = { maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0 };
-app.use('/assets', express.static(path.join(__dirname, 'public'), staticOpts));
+const staticOpts = { maxAge: PROD ? '7d' : 0 };
+// Site CSS/JS/images change between deploys: short cache + ?v= version on CSS/JS links.
+app.use('/assets', express.static(path.join(__dirname, 'public'), { maxAge: PROD ? '1h' : 0 }));
+// Version string for cache-busting, derived from the site's own files at startup.
+const ASSET_VERSION = (() => {
+  const files = ['public/css/site.css', 'public/js/site.js', 'public/js/chip3d.js'];
+  const h = crypto.createHash('sha1');
+  files.forEach(f => { try { h.update(fs.readFileSync(path.join(__dirname, f))); } catch { /* missing file */ } });
+  return h.digest('hex').slice(0, 10);
+})();
+app.locals.v = ASSET_VERSION;
+
+app.get('/healthz', (req, res) => res.json({ ok: true, version: ASSET_VERSION }));
 app.use('/vendor/gsap', express.static(path.join(__dirname, 'node_modules/gsap/dist'), staticOpts));
 app.use('/vendor/lenis', express.static(path.join(__dirname, 'node_modules/lenis/dist'), staticOpts));
 app.use('/vendor/three/build', express.static(path.join(__dirname, 'node_modules/three/build'), staticOpts));
@@ -329,7 +343,7 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something went wrong.');
 });
 
-app.listen(PORT, () => {
-  console.log(`\n  SFA Semicon website running →  http://localhost:${PORT}`);
-  console.log(`  Admin panel               →  http://localhost:${PORT}/admin\n`);
+app.listen(PORT, HOST, () => {
+  console.log(`\n  SFA Semicon website running →  http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`);
+  console.log(`  Admin panel               →  http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}/admin\n`);
 });

@@ -22,6 +22,7 @@ To choose the credentials yourself, start the very first time with `ADMIN_USER=�
 | Variable | Default | Purpose |
 |---|---|---|
 | `PORT` | `4400` | HTTP port |
+| `HOST` | `0.0.0.0` | Interface to listen on — use `127.0.0.1` behind a reverse proxy |
 | `DATA_DIR` | `./data` | Where content, uploads, backups and the session key live |
 | `ADMIN_USER` / `ADMIN_PASSWORD` | `admin` / random | First-run admin account |
 | `SESSION_SECRET` | auto-generated in `data/secret.key` | Cookie signing key |
@@ -85,6 +86,11 @@ data/                Created at runtime — content, uploads, backups (not in gi
 The admin form is generated automatically.
 
 ## Deploying
+
+**Windows server (semicon.tserver.co.in, behind Caddy):** follow [deploy/windows/README.md](deploy/windows/README.md).
+Build the upload zips with `python3 deploy/make-release.py --data`.
+
+**Other hosts:**
 
 Any Node 18+ host works (VPS, Render, Railway, a PaaS with a persistent disk, etc.).
 Keep `DATA_DIR` on persistent storage and back it up — it holds all content and uploads.
