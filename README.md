@@ -32,6 +32,8 @@ To choose the credentials yourself, start the very first time with `ADMIN_USER=â
 | Section | Editable | Built-in animation |
 |---|---|---|
 | Hero | all text, buttons, chip label, spec labels, badges | WebGL 3D chip, circuit board with light pulses, particles, bloom, mouse + scroll motion |
+| EDA flow (code â†’ silicon) | heading, intro, window title, 6 stages (name, tools, text, status metric) | sticky EDA workbench: typing Verilog, scrolling waveforms, self-drawing netlist, place & route, sign-off heat-map, GDSII layout |
+| EDA toolkit | tool categories (icon, text, features, AI callout), button | tabbed panels with sliding highlight |
 | Marquee | words, style | speed + skew react to scroll velocity |
 | About | statement, body, image, key points | words light up as you scroll |
 | Stats | numbers, prefixes/suffixes, labels | count-up |

@@ -1,0 +1,58 @@
+<% const stages = (s.stages || []).slice(0, 6); %>
+<section class="sec edaflow" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %> data-edaflow>
+  <div class="container">
+    <%- include('../partials/sectionHead', { s: s, split: true }) %>
+    <div class="edaflow__grid">
+      <div class="edaflow__steps">
+        <% stages.forEach(function (st, i) { %>
+          <article class="estep<%= i === 0 ? ' is-active' : '' %>" data-estep="<%= i %>" data-name="<%= st.name %>" data-metric="<%= st.metric %>">
+            <div class="estep__rail"><span class="estep__num"><%= h.pad(i + 1) %></span></div>
+            <div class="estep__body">
+              <% if (st.tool) { %><span class="estep__tool"><%= st.tool %></span><% } %>
+              <h3 class="estep__title"><%= st.name %></h3>
+              <p class="estep__text"><%- h.fmt(st.text) %></p>
+              <% if (st.metric) { %><span class="estep__metric"><%- h.icon('check') %><%= st.metric %></span><% } %>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+
+      <div class="edaflow__sticky">
+        <div class="ewin" data-ewin aria-hidden="true">
+          <div class="ewin__bar">
+            <span class="term__dots"><i></i><i></i><i></i></span>
+            <span class="ewin__title"><%= s.windowTitle || 'sfa-eda' %></span>
+            <span class="ewin__stage" data-ewin-stage><%= (stages[0] || {}).name %></span>
+          </div>
+          <div class="ewin__body">
+            <div class="ewin__tools">
+              <% ['code', 'eye', 'circuit', 'layers', 'gauge', 'wafer'].forEach(function (ic, i) { %><span class="ewin__tool<%= i === 0 ? ' is-active' : '' %>" data-ewin-tool><%- h.icon(ic) %></span><% }) %>
+            </div>
+            <div class="ewin__canvas">
+              <div class="ev ev--rtl is-active" data-ev><pre class="ev-code" data-ev-code></pre></div>
+              <div class="ev ev--sim" data-ev><svg data-ev-sim viewBox="0 0 400 300" preserveAspectRatio="none"></svg></div>
+              <div class="ev ev--syn" data-ev><svg data-ev-syn viewBox="0 0 400 300"></svg></div>
+              <div class="ev ev--pnr" data-ev><svg data-ev-pnr viewBox="0 0 400 300"></svg></div>
+              <div class="ev ev--sign" data-ev>
+                <svg data-ev-sign viewBox="0 0 400 300"></svg>
+                <ul class="ev-checks">
+                  <li><%- h.icon('check') %>Setup timing</li><li><%- h.icon('check') %>Hold timing</li><li><%- h.icon('check') %>IR drop / EM</li><li><%- h.icon('check') %>DRC · 0</li><li><%- h.icon('check') %>LVS clean</li>
+                </ul>
+              </div>
+              <div class="ev ev--gds" data-ev>
+                <svg data-ev-gds viewBox="0 0 400 300"></svg>
+                <span class="ev-stamp">GDSII · Tape-out ready</span>
+              </div>
+            </div>
+          </div>
+          <div class="ewin__status">
+            <span class="ewin__ai"><i></i>AI agent active</span>
+            <span class="ewin__metric" data-ewin-metric><%= (stages[0] || {}).metric %></span>
+            <span class="ewin__count"><b data-ewin-count>01</b> / <%= h.pad(stages.length || 6) %></span>
+            <span class="ewin__progress"><i data-ewin-progress></i></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

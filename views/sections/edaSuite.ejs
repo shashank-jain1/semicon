@@ -1,0 +1,42 @@
+<% const tabs = s.tabs || []; const uidBase = 'et-' + sec.id; %>
+<section class="sec edasuite" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %> data-edasuite>
+  <div class="container">
+    <%- include('../partials/sectionHead', { s: s, split: true }) %>
+    <div class="etabs-wrap" data-reveal>
+      <div class="etabs" role="tablist" aria-label="EDA tool categories" data-etabs>
+        <% tabs.forEach(function (t, i) { %>
+          <button class="etab<%= i === 0 ? ' is-active' : '' %>" role="tab" id="<%= uidBase %>-t<%= i %>" aria-controls="<%= uidBase %>-p<%= i %>" aria-selected="<%= i === 0 %>" tabindex="<%= i === 0 ? 0 : -1 %>" data-etab>
+            <%- h.icon(t.icon) %><span><%= t.title %></span>
+          </button>
+        <% }) %>
+        <span class="etabs__ink" data-etabs-ink aria-hidden="true"></span>
+      </div>
+    </div>
+    <div class="epanels" data-reveal>
+      <% tabs.forEach(function (t, i) {
+           const feats = String(t.features || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean); %>
+        <div class="epanel<%= i === 0 ? ' is-active' : '' %>" role="tabpanel" id="<%= uidBase %>-p<%= i %>" aria-labelledby="<%= uidBase %>-t<%= i %>" data-epanel <%- i === 0 ? '' : 'hidden' %>>
+          <div class="epanel__main">
+            <span class="epanel__num"><%= h.pad(i + 1) %> <i></i> <%= h.pad(tabs.length) %></span>
+            <h3 class="epanel__title"><%= t.title %></h3>
+            <p class="epanel__text"><%- h.fmt(t.text) %></p>
+            <% if (feats.length) { %>
+              <ul class="epanel__feats"><% feats.forEach(function (f) { %><li><%- h.icon('check') %><span><%= f %></span></li><% }) %></ul>
+            <% } %>
+          </div>
+          <div class="epanel__ai" data-spot>
+            <div class="epanel__orb">
+              <span class="epanel__ring"></span><span class="epanel__ring epanel__ring--2"></span>
+              <span class="epanel__icon"><%- h.icon(t.icon) %></span>
+            </div>
+            <% if (t.aiLabel) { %><span class="epanel__ailabel"><%- h.icon('sparkles') %><%= t.aiLabel %></span><% } %>
+            <% if (t.aiText) { %><p class="epanel__aitext"><%- h.fmt(t.aiText) %></p><% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+    <% if (s.ctaLabel) { %>
+      <div class="center-cta" data-reveal><a class="btn btn--primary btn--lg" data-magnetic href="<%= h.url(s.ctaLink) %>"><span><%= s.ctaLabel %></span><%- h.icon('arrow') %></a></div>
+    <% } %>
+  </div>
+</section>

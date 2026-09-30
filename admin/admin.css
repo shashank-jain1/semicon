@@ -59,7 +59,9 @@ svg { display: block; }
 .login { min-height: 100vh; display: grid; place-items: center; padding: 20px; background: radial-gradient(ellipse at 50% -10%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 55%), var(--bg); }
 .login__card { width: 100%; max-width: 380px; padding: 36px 32px; border-radius: 20px; background: var(--panel); border: 1px solid var(--line-2); box-shadow: 0 40px 100px -30px rgba(0, 0, 0, .8); }
 .login__logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 auto 24px; font-family: var(--fd); font-size: 18px; letter-spacing: .08em; }
-.login__logo img { height: 40px; }
+.login__logo { align-items: flex-end; }
+.login__logo img { height: 52px; }
+.login__logo b { font-size: 22px; letter-spacing: 0; margin-bottom: 12px; }
 .login h1 { font-size: 22px; text-align: center; margin-bottom: 6px; }
 .login p.sub { text-align: center; color: var(--muted); margin: 0 0 26px; }
 .login form { display: grid; gap: 14px; }
@@ -70,8 +72,10 @@ svg { display: block; }
 .shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
 .side { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px; padding: 20px 14px; border-right: 1px solid var(--line); background: var(--panel); }
 .side__logo { display: flex; align-items: center; gap: 10px; padding: 4px 8px 22px; }
-.side__logo img { height: 28px; }
-.side__logo b { font-family: var(--fd); font-weight: 600; font-size: 14px; letter-spacing: .06em; white-space: nowrap; }
+.side__logo { align-items: flex-end; }
+.side__logo img { height: 34px; }
+.side__logo b { font-family: var(--fd); font-weight: 600; font-size: 15px; white-space: nowrap; margin: 0 2px 7px -2px; }
+.side__logo span { margin-bottom: 7px; }
 .side__logo span { font-family: var(--fm); font-size: 10px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; border: 1px solid var(--line-2); padding: 2px 6px; border-radius: 6px; }
 .side__link { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 9px; color: var(--muted); text-decoration: none; font-weight: 500; transition: background .2s, color .2s; }
 .side__link:hover { background: var(--panel-2); color: var(--text); }

@@ -42,6 +42,24 @@
     if (G) G.ticker.add(() => { scroll.v *= 0.9; });
   }
 
+  // Hover effects only hear about mouse movement, but scrolling slides content under a still
+  // cursor. Track the last pointer position and re-evaluate what is under it after each scroll.
+  const pointer = { x: -1, y: -1, active: false };
+  const hoverCheckers = [];
+  window.addEventListener('pointermove', (e) => { pointer.x = e.clientX; pointer.y = e.clientY; pointer.active = e.pointerType === 'mouse'; }, { passive: true });
+  document.addEventListener('mouseleave', () => { pointer.active = false; });
+  let hoverQueued = false;
+  const recheckHover = () => {
+    if (hoverQueued || !pointer.active || !hoverCheckers.length) return;
+    hoverQueued = true;
+    requestAnimationFrame(() => {
+      hoverQueued = false;
+      const target = document.elementFromPoint(pointer.x, pointer.y);
+      hoverCheckers.forEach(fn => fn(target));
+    });
+  };
+  onScrollFns.push(recheckHover);
+
   const headerOffset = () => ($('[data-header]')?.offsetHeight || 70) + 10;
   function scrollToTarget(target) {
     if (lenis) lenis.scrollTo(target, { offset: typeof target === 'number' ? 0 : -headerOffset(), duration: 1.6 });
@@ -152,13 +170,16 @@
     document.addEventListener('pointerup', () => cur.classList.remove('is-down'));
     document.addEventListener('mouseleave', () => G.to(cur, { opacity: 0, duration: 0.3 }));
     document.addEventListener('mouseenter', () => G.to(cur, { opacity: 1, duration: 0.3 }));
-    document.addEventListener('pointerover', (e) => {
-      const labelEl = e.target.closest('[data-cursor-label]');
-      const hov = e.target.closest('a, button, label, [data-tilt], [data-ind-row], summary');
+    const applyHover = (target) => {
+      const el = target && target.closest ? target : null;
+      const labelEl = el?.closest('[data-cursor-label]');
+      const hov = el?.closest('a, button, label, [data-tilt], [data-ind-row], summary');
       cur.classList.toggle('is-hover', !!hov && !labelEl);
       cur.classList.toggle('has-label', !!labelEl);
       lbl.textContent = labelEl ? labelEl.dataset.cursorLabel : '';
-    });
+    };
+    document.addEventListener('pointerover', (e) => applyHover(e.target));
+    hoverCheckers.push(applyHover);
   }
 
   // ---------- Magnetic buttons ----------
@@ -420,19 +441,24 @@
     if (!sec || !finePointer || !animate) return;
     const f = $('[data-ind-follower]', sec);
     const xTo = G.quickTo(f, 'x', { duration: 0.5, ease: 'power3' }), yTo = G.quickTo(f, 'y', { duration: 0.5, ease: 'power3' });
-    let lastX = 0;
-    sec.addEventListener('pointermove', (e) => {
-      xTo(e.clientX); yTo(e.clientY);
-      G.to(f, { rotation: Math.max(-25, Math.min(25, (e.clientX - lastX) * 1.2)), duration: 0.4 });
-      lastX = e.clientX;
-    });
-    $$('[data-ind-row]', sec).forEach(row => {
-      row.addEventListener('pointerenter', () => {
+    let currentRow = null;
+    const sync = (target) => {
+      const row = target && target.closest ? target.closest('[data-ind-row]') : null;
+      if (row === currentRow) return;
+      const wasShown = !!currentRow;
+      currentRow = row;
+      G.killTweensOf(f, 'scale');
+      if (row) {
         f.innerHTML = $('template', row).innerHTML;
-        G.to(f, { scale: 1, duration: 0.5, ease: 'back.out(1.7)' });
-      });
-    });
-    $('.ind', sec).addEventListener('pointerleave', () => G.to(f, { scale: 0, duration: 0.4, ease: 'power3.in' }));
+        if (!wasShown) G.set(f, { x: pointer.x, y: pointer.y }); // appear under the cursor, not where it was last hidden
+        G.to(f, { scale: 1, duration: 0.45, ease: 'back.out(1.7)' });
+      } else {
+        G.to(f, { scale: 0, duration: 0.3, ease: 'power3.in' });
+      }
+    };
+    sec.addEventListener('pointermove', (e) => { xTo(e.clientX); yTo(e.clientY); sync(e.target); });
+    sec.addEventListener('pointerleave', () => sync(null));
+    hoverCheckers.push(sync);
   }
 
   // ---------- Training console ----------
@@ -537,6 +563,281 @@
       }, { threshold: 0.25 }).observe(term);
       window.addEventListener('resize', resize);
       resize();
+    });
+  }
+
+  // ---------- EDA flow: sticky workbench that visualises each stage ----------
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const svgEl = (tag, attrs = {}, parent) => {
+    const e = document.createElementNS(SVGNS, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  const prng = (seed) => () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+
+  const RTL = `// npu_mac.sv — drafted with the SFA RTL copilot
+module npu_mac #(parameter W = 8) (
+  input  logic           clk, rst_n,
+  input  logic [W-1:0]   a, b,
+  input  logic           valid_in,
+  output logic [2*W+7:0] acc
+);
+  always_ff @(posedge clk or negedge rst_n)
+    if (!rst_n)        acc <= '0;
+    else if (valid_in) acc <= acc + a * b;
+endmodule`;
+  function highlightVerilog(src) {
+    const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return src.split('\n').map(line => {
+      const ci = line.indexOf('//');
+      const code = ci >= 0 ? line.slice(0, ci) : line, comment = ci >= 0 ? line.slice(ci) : '';
+      const hl = esc(code)
+        .replace(/\b(module|endmodule|parameter|input|output|always_ff|posedge|negedge|or|if|else)\b/g, '<span class="k">$1</span>')
+        .replace(/\b(logic)\b/g, '<span class="t">$1</span>')
+        .replace(/\b(\d+)\b/g, '<span class="n">$1</span>');
+      return hl + (comment ? `<span class="c">${esc(comment)}</span>` : '');
+    }).join('\n');
+  }
+
+  function buildSim(svg) {
+    const R = prng(21), L = 320, x0 = 70, rows = ['clk', 'rst_n', 'valid_in', 'a[7:0]', 'b[7:0]', 'acc'];
+    const clip = svgEl('clipPath', { id: 'evSimClip' }, svgEl('defs', {}, svg));
+    svgEl('rect', { x: x0 - 4, y: 0, width: 340, height: 300 }, clip);
+    rows.forEach((r, i) => { const t = svgEl('text', { x: 6, y: 34 + i * 44, class: 'ev-sig' }, svg); t.textContent = r; });
+    const g = svgEl('g', { 'clip-path': 'url(#evSimClip)' }, svg);
+    const track = svgEl('g', { class: 'ev-wave-track' }, g);
+    const hi = (i) => 18 + i * 44, lo = (i) => 38 + i * 44;
+    const stroke = { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 1.3 };
+    // Pre-compute one period so the loop is seamless.
+    const valid = Array.from({ length: 16 }, () => R() > 0.35);
+    const busA = Array.from({ length: 8 }, () => Math.floor(R() * 256).toString(16).toUpperCase().padStart(2, '0'));
+    const busB = Array.from({ length: 8 }, () => Math.floor(R() * 256).toString(16).toUpperCase().padStart(2, '0'));
+    for (let copy = 0; copy < 2; copy++) {
+      const ox = x0 + copy * L;
+      let d = '';
+      for (let x = 0; x < L; x += 20) d += `M${ox + x} ${lo(0)}V${hi(0)}H${ox + x + 10}V${lo(0)}H${ox + x + 20}`;
+      svgEl('path', { d, ...stroke }, track);
+      svgEl('path', { d: `M${ox} ${copy ? hi(1) : lo(1)}H${ox + (copy ? 0 : 30)}V${hi(1)}H${ox + L}`, ...stroke }, track);
+      d = `M${ox} ${lo(2)}`;
+      valid.forEach((v, k) => { const y = v ? hi(2) : lo(2); d += `V${y}H${ox + (k + 1) * 20}`; });
+      svgEl('path', { d, ...stroke, stroke: 'var(--accent-2)' }, track);
+      [busA, busB].forEach((bus, bi) => {
+        const row = 3 + bi;
+        bus.forEach((val, k) => {
+          const bx = ox + k * 40, m = (hi(row) + lo(row)) / 2;
+          svgEl('path', { d: `M${bx + 3} ${hi(row)}H${bx + 37}L${bx + 40} ${m}L${bx + 37} ${lo(row)}H${bx + 3}L${bx} ${m}Z`, fill: 'rgba(255,255,255,.04)', stroke: 'rgba(255,255,255,.35)', 'stroke-width': 1 }, track);
+          const t = svgEl('text', { x: bx + 20, y: m + 3, 'text-anchor': 'middle', class: 'ev-bus' }, track); t.textContent = val;
+        });
+      });
+      for (let k = 0; k < 4; k++) {
+        const bx = ox + k * 80, m = (hi(5) + lo(5)) / 2;
+        svgEl('path', { d: `M${bx + 3} ${hi(5)}H${bx + 77}L${bx + 80} ${m}L${bx + 77} ${lo(5)}H${bx + 3}L${bx} ${m}Z`, fill: 'color-mix(in srgb, var(--accent) 12%, transparent)', stroke: 'var(--accent)', 'stroke-width': 1 }, track);
+        const t = svgEl('text', { x: bx + 40, y: m + 3, 'text-anchor': 'middle', class: 'ev-bus' }, track); t.textContent = `0x${(0x1a40 + k * 0x3f7).toString(16).toUpperCase()}`;
+      }
+    }
+    svgEl('line', { x1: 290, y1: 8, x2: 290, y2: 290, stroke: 'var(--accent-2)', 'stroke-dasharray': '3 3', 'stroke-width': 1 }, svg);
+    const ts = svgEl('text', { x: 294, y: 290, class: 'ev-sig' }, svg); ts.textContent = 't = 1.28 µs';
+  }
+
+  function buildSyn(svg) {
+    const R = prng(8), cols = 5, colX = (c) => 30 + c * 78, gates = [];
+    const types = ['AND2', 'XOR2', 'OR2', 'NAND2', 'MUX2', 'DFF', 'INV', 'AOI21'];
+    let gi = 0;
+    for (let c = 0; c < cols; c++) {
+      const n = c === cols - 1 ? 3 : 4 + Math.floor(R() * 2);
+      for (let r = 0; r < n; r++) {
+        const y = 30 + (r + 0.5) * (240 / n) - 12;
+        gates.push({ c, x: colX(c), y, type: c === cols - 1 ? 'DFF' : types[Math.floor(R() * types.length)], i: gi++ });
+      }
+    }
+    const wires = svgEl('g', {}, svg);
+    let wi = 0;
+    gates.forEach(g => {
+      if (g.c === cols - 1) return;
+      const next = gates.filter(o => o.c === g.c + 1);
+      const k = 1 + Math.floor(R() * 2);
+      for (let j = 0; j < k; j++) {
+        const t = next[Math.floor(R() * next.length)];
+        const sx = g.x + 40, sy = g.y + 12, ex = t.x, ey = t.y + 6 + j * 12, mx = sx + 12 + (wi % 4) * 5;
+        svgEl('path', { d: `M${sx} ${sy}H${mx}V${ey}H${ex}`, class: 'ev-wire', pathLength: 1, style: `--i:${wi++}` }, wires);
+      }
+    });
+    gates.forEach(g => {
+      const grp = svgEl('g', { class: 'ev-gate', style: `--i:${g.i}` }, svg);
+      if (g.type === 'DFF') svgEl('rect', { x: g.x, y: g.y - 4, width: 40, height: 32, rx: 3 }, grp);
+      else svgEl('path', { d: `M${g.x} ${g.y}H${g.x + 24}A16 12 0 0 1 ${g.x + 24} ${g.y + 24}H${g.x}Z` }, grp);
+      const t = svgEl('text', { x: g.x + 20, y: g.y + 15 }, grp); t.textContent = g.type;
+    });
+  }
+
+  function buildLayout(svg, R, { cellsOnly = false } = {}) {
+    svgEl('rect', { x: 14, y: 14, width: 372, height: 272, rx: 4, class: 'ev-core' }, svg);
+    if (!cellsOnly) for (let x = 40; x < 380; x += 48) svgEl('line', { x1: x, y1: 16, x2: x, y2: 284, class: 'ev-strap' }, svg);
+    const macros = [[24, 24, 104, 78, 'SRAM 64K'], [24, 196, 104, 78, 'SRAM 64K'], [24, 112, 60, 74, 'PLL']];
+    macros.forEach(([x, y, w, hh, label]) => {
+      svgEl('rect', { x, y, width: w, height: hh, rx: 3, class: 'ev-macro' }, svg);
+      const t = svgEl('text', { x: x + 8, y: y + 16, class: 'ev-macro-t' }, svg); t.textContent = label;
+    });
+    const cells = svgEl('g', {}, svg);
+    let ci = 0;
+    for (let y = 24; y < 276; y += 11) {
+      let x = y > 110 && y < 188 ? 92 : 136;
+      while (x < 376) {
+        const w = 5 + Math.floor(R() * 14);
+        if (x + w > 376) break;
+        if (R() > 0.12) svgEl('rect', { x, y, width: w, height: 9, class: 'ev-cell', style: `--d:${Math.floor(R() * 900)}` }, cells);
+        x += w + 1; ci++;
+      }
+    }
+    return cells;
+  }
+
+  function buildPnr(svg) {
+    const R = prng(4);
+    buildLayout(svg, R);
+    const routes = svgEl('g', {}, svg), metals = ['ev-m1', 'ev-m2', 'ev-m3'];
+    for (let i = 0; i < 70; i++) {
+      let x = 90 + R() * 285, y = 24 + R() * 250, d = `M${x.toFixed(1)} ${y.toFixed(1)}`;
+      const segs = 2 + Math.floor(R() * 3);
+      for (let s = 0; s < segs; s++) {
+        if (s % 2) { y = Math.min(280, Math.max(20, y + (R() - 0.5) * 120)); d += `V${y.toFixed(1)}`; }
+        else { x = Math.min(380, Math.max(20, x + (R() - 0.5) * 160)); d += `H${x.toFixed(1)}`; }
+      }
+      svgEl('path', { d, class: `ev-route ${metals[i % 3]}`, pathLength: 1, style: `--i:${i}` }, routes);
+    }
+  }
+
+  function buildSign(svg) {
+    const R = prng(4);
+    const defs = svgEl('defs', {}, svg);
+    const grad = (id, c) => {
+      const g = svgEl('radialGradient', { id }, defs);
+      svgEl('stop', { offset: '0', 'stop-color': c, 'stop-opacity': '.85' }, g);
+      svgEl('stop', { offset: '1', 'stop-color': c, 'stop-opacity': '0' }, g);
+    };
+    grad('evHot', '#ef4444'); grad('evWarm', '#f59e0b'); grad('evCool', '#22c55e');
+    const cells = buildLayout(svg, R, { cellsOnly: true });
+    cells.querySelectorAll('rect').forEach(r => r.style.setProperty('--d', '0'));
+    const blobs = [[250, 90, 70], [320, 200, 60], [180, 230, 55], [300, 60, 40], [200, 140, 45]];
+    const hot = svgEl('g', { class: 'ev-hot' }, svg), cool = svgEl('g', { class: 'ev-cool' }, svg);
+    blobs.forEach(([x, y, r], i) => {
+      svgEl('circle', { cx: x, cy: y, r, fill: `url(#${i % 2 ? 'evWarm' : 'evHot'})` }, hot);
+      svgEl('circle', { cx: x, cy: y, r: r * 0.9, fill: 'url(#evCool)' }, cool);
+    });
+  }
+
+  function buildGds(svg) {
+    const R = prng(13), defs = svgEl('defs', {}, svg);
+    const hatch = (id, color, angle) => {
+      const p = svgEl('pattern', { id, width: 5, height: 5, patternUnits: 'userSpaceOnUse', patternTransform: `rotate(${angle})` }, defs);
+      svgEl('rect', { width: 5, height: 5, fill: color, 'fill-opacity': '.18' }, p);
+      svgEl('line', { x1: 0, y1: 0, x2: 0, y2: 5, stroke: color, 'stroke-width': 1.4, 'stroke-opacity': '.8' }, p);
+    };
+    hatch('gM1', '#3b82f6', 45); hatch('gM2', '#d946ef', -45); hatch('gM3', '#eab308', 0);
+    const layer = (cls) => svgEl('g', { class: cls }, svg);
+    const diff = layer(), poly = layer(), m1 = layer(), m2 = layer(), m3 = layer(), via = layer();
+    for (let row = 0; row < 7; row++) {
+      const y = 18 + row * 38;
+      for (let x = 16; x < 380;) {
+        const w = 26 + Math.floor(R() * 34);
+        if (x + w > 386) break;
+        svgEl('rect', { x, y: y + 6, width: w, height: 9, fill: '#22c55e', 'fill-opacity': '.35', stroke: '#22c55e', 'stroke-opacity': '.7', 'stroke-width': .6 }, diff);
+        svgEl('rect', { x, y: y + 20, width: w, height: 9, fill: '#22c55e', 'fill-opacity': '.25', stroke: '#22c55e', 'stroke-opacity': '.6', 'stroke-width': .6 }, diff);
+        for (let px = x + 4; px < x + w - 2; px += 7) svgEl('rect', { x: px, y: y + 2, width: 2.4, height: 31, fill: '#ef4444', 'fill-opacity': '.8' }, poly);
+        x += w + 6;
+      }
+      svgEl('rect', { x: 14, y: y - 1, width: 372, height: 4, fill: 'url(#gM1)' }, m1);
+      for (let k = 0; k < 5; k++) svgEl('rect', { x: 20 + R() * 300, y: y + 14, width: 30 + R() * 60, height: 3.5, fill: 'url(#gM1)' }, m1);
+    }
+    for (let k = 0; k < 16; k++) {
+      const x = 22 + k * 23 + R() * 6, y0 = 16 + R() * 120, h = 60 + R() * 150;
+      svgEl('rect', { x, y: y0, width: 4, height: Math.min(h, 280 - y0), fill: 'url(#gM2)' }, m2);
+      svgEl('rect', { x: x + 0.5, y: y0 + 2, width: 3, height: 3, fill: '#fff', 'fill-opacity': '.85' }, via);
+      svgEl('rect', { x: x + 0.5, y: y0 + Math.min(h, 280 - y0) - 5, width: 3, height: 3, fill: '#fff', 'fill-opacity': '.85' }, via);
+    }
+    for (let k = 0; k < 6; k++) svgEl('rect', { x: 14, y: 30 + k * 46 + R() * 10, width: 372, height: 6, fill: 'url(#gM3)' }, m3);
+  }
+
+  function setupEdaFlow() {
+    $$('[data-edaflow]').forEach(sec => {
+      const steps = $$('[data-estep]', sec), views = $$('[data-ev]', sec), tools = $$('[data-ewin-tool]', sec);
+      const stageEl = $('[data-ewin-stage]', sec), metricEl = $('[data-ewin-metric]', sec), countEl = $('[data-ewin-count]', sec), prog = $('[data-ewin-progress]', sec);
+      const code = $('[data-ev-code]', sec);
+      buildSim($('[data-ev-sim]', sec));
+      buildSyn($('[data-ev-syn]', sec));
+      buildPnr($('[data-ev-pnr]', sec));
+      buildSign($('[data-ev-sign]', sec));
+      buildGds($('[data-ev-gds]', sec));
+      let typer = null, current = -1;
+      function typeCode() {
+        clearInterval(typer);
+        if (reduce) { code.innerHTML = highlightVerilog(RTL); return; }
+        let n = 0;
+        typer = setInterval(() => {
+          n = Math.min(RTL.length, n + 6);
+          code.innerHTML = highlightVerilog(RTL.slice(0, n)) + '<span class="caret"></span>';
+          if (n >= RTL.length) clearInterval(typer);
+        }, 22);
+      }
+      function activate(i) {
+        if (i === current || !steps[i]) return;
+        current = i;
+        steps.forEach((s, k) => s.classList.toggle('is-active', k === i));
+        tools.forEach((t, k) => t.classList.toggle('is-active', k === i));
+        views.forEach((v, k) => {
+          v.classList.toggle('is-active', k === i);
+          v.classList.remove('is-play');
+        });
+        const v = views[i];
+        if (v) { void v.offsetWidth; v.classList.add('is-play'); }
+        if (i === 0) typeCode();
+        stageEl.textContent = steps[i].dataset.name || '';
+        metricEl.textContent = steps[i].dataset.metric || '';
+        countEl.textContent = String(i + 1).padStart(2, '0');
+        prog.style.width = `${((i + 1) / steps.length) * 100}%`;
+      }
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(en => { if (en.isIntersecting) activate(Number(en.target.dataset.estep)); });
+      }, {
+        // On small screens the sticky workbench covers the top ~40%, so trigger lower down.
+        rootMargin: matchMedia('(max-width: 960px)').matches ? '-68% 0px -30% 0px' : '-48% 0px -48% 0px'
+      });
+      steps.forEach(s => io.observe(s));
+      // Start typing the first stage when the window first comes into view.
+      new IntersectionObserver(([en], obs) => { if (en.isIntersecting) { if (current === -1) activate(0); else if (current === 0) typeCode(); obs.disconnect(); } }, { threshold: 0.3 }).observe($('[data-ewin]', sec));
+    });
+  }
+
+  // ---------- EDA suite tabs ----------
+  function setupEdaSuite() {
+    $$('[data-edasuite]').forEach(sec => {
+      const tabs = $$('[data-etab]', sec), panels = $$('[data-epanel]', sec), ink = $('[data-etabs-ink]', sec), wrap = $('.etabs-wrap', sec);
+      let active = 0;
+      const moveInk = () => {
+        const t = tabs[active]; if (!t || !ink) return;
+        ink.style.width = `${t.offsetWidth}px`;
+        ink.style.transform = `translateX(${t.offsetLeft}px)`;
+      };
+      const select = (i, focus) => {
+        active = (i + tabs.length) % tabs.length;
+        tabs.forEach((t, k) => { const on = k === active; t.classList.toggle('is-active', on); t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; });
+        panels.forEach((p, k) => { const on = k === active; p.hidden = !on; p.classList.toggle('is-active', on); });
+        moveInk();
+        const t = tabs[active];
+        if (wrap && t) wrap.scrollTo({ left: t.offsetLeft - wrap.clientWidth / 2 + t.offsetWidth / 2, behavior: reduce ? 'auto' : 'smooth' });
+        if (focus) t.focus();
+      };
+      tabs.forEach((t, i) => {
+        t.addEventListener('click', () => select(i));
+        t.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowRight') { e.preventDefault(); select(active + 1, true); }
+          if (e.key === 'ArrowLeft') { e.preventDefault(); select(active - 1, true); }
+        });
+      });
+      window.addEventListener('resize', moveInk);
+      if (document.fonts) document.fonts.ready.then(moveInk);
+      moveInk();
     });
   }
 
@@ -671,6 +972,8 @@
   setupMarquees();
   setupIndustries();
   setupTerminal();
+  setupEdaFlow();
+  setupEdaSuite();
   setupQuotes();
   setupAccordion();
   setupForms();

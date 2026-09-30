@@ -1,6 +1,14 @@
-<a class="logo" href="/" aria-label="<%= site.siteName %> home">
-  <% if (site.logoImage) { %>
+<%
+  // masthead = SFA ring mark + word · icon = icon + logo text · image = uploaded logo (falls back to masthead)
+  let logoStyle = site.logoStyle || (site.logoImage ? 'image' : 'masthead');
+  if (logoStyle === 'image' && !site.logoImage) logoStyle = 'masthead';
+%>
+<a class="logo<%= logoStyle === 'masthead' ? ' logo--mast' : '' %>" href="/" aria-label="<%= site.siteName %> home">
+  <% if (logoStyle === 'image') { %>
     <img class="logo__img" src="<%= site.logoImage %>" alt="<%= site.siteName %>">
+  <% } else if (logoStyle === 'masthead') { %>
+    <picture class="mast__pic"><source srcset="/assets/img/sfa-mast.webp" type="image/webp"><img class="mast__img" src="/assets/img/sfa-mast.png" alt="SFA" width="416" height="240"></picture>
+    <% if (site.logoWord) { %><span class="mast__word"><%= site.logoWord %></span><% } %>
   <% } else if (site.logoMark) { %>
     <img class="logo__markimg" src="<%= site.logoMark %>" alt="">
     <span class="logo__text"><%= site.logoText || site.siteName %></span>
