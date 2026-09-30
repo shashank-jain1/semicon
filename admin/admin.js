@@ -61,7 +61,7 @@
   const ui = (name, cls = 'ico') => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('fill', 'none'); s.setAttribute('stroke', 'currentColor'); s.setAttribute('stroke-width', '1.8'); s.setAttribute('stroke-linecap', 'round'); s.setAttribute('stroke-linejoin', 'round'); s.setAttribute('class', cls); s.innerHTML = UI[name] || ''; return s; };
   const siteIcon = (name, cls = 'ico') => { const s = ui('', cls); s.innerHTML = state.icons[name] || state.icons.cpu || ''; s.setAttribute('stroke-width', '1.6'); return s; };
 
-  const TYPE_ICON = { hero: 'cpu', edaFlow: 'circuit', edaSuite: 'sparkles', marquee: 'arrow', stats: 'gauge', about: 'users', services: 'layers', chipAnatomy: 'microscope', trainingLab: 'brain', process: 'network', industries: 'factory', academy: 'graduation', techStack: 'code', testimonials: 'quote', faq: 'book', cta: 'rocket', contact: 'mail', richText: 'book', imageText: 'media', cards: 'circuit', html: 'code' };
+  const TYPE_ICON = { hero: 'cpu', edaFlow: 'circuit', edaSuite: 'sparkles', ipPortfolio: 'network', marquee: 'arrow', stats: 'gauge', about: 'users', services: 'layers', chipAnatomy: 'microscope', trainingLab: 'brain', process: 'network', industries: 'factory', academy: 'graduation', techStack: 'code', testimonials: 'quote', faq: 'book', cta: 'rocket', contact: 'mail', richText: 'book', imageText: 'media', cards: 'circuit', html: 'code' };
   const typeIcon = (type) => (TYPE_ICON[type] === 'media' ? ui('media') : siteIcon(TYPE_ICON[type] || 'cpu'));
 
   // ---------- State ----------

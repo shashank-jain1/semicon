@@ -100,6 +100,9 @@ powershell -ExecutionPolicy Bypass -File C:\sites\sfa-semicon\deploy\windows\upd
 ```
 
 Content edited in the admin panel lives in `data\` and is never touched by updates.
+If a release adds new sections (e.g. the IP section), the site adds them to your existing content **once, on
+startup** — only what's missing, never overwriting your edits — after saving a snapshot you can restore under Admin → Backups.
+The service log shows what was applied (`▸ Content update ...`).
 
 ## Day-to-day
 

@@ -1,0 +1,79 @@
+<%
+  const items = (s.items || []).slice(0, 12);
+  const palette = ['var(--accent)', 'var(--accent-2)', '#22d3ee', '#a78bfa', '#34d399', '#fbbf24', '#f472b6', '#60a5fa'];
+  const cats = [];
+  items.forEach(function (it) { const c = (it.category || 'Other').trim(); if (cats.indexOf(c) < 0) cats.push(c); });
+  const colorOf = function (c) { return palette[cats.indexOf((c || 'Other').trim()) % palette.length]; };
+%>
+<section class="sec ipx" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %> data-ipx>
+  <div class="container">
+    <%- include('../partials/sectionHead', { s: s, split: true }) %>
+
+    <% if (cats.length > 1) { %>
+    <div class="ipx__filters" role="group" aria-label="Filter IP by category" data-reveal>
+      <button class="ipx__chip is-active" data-ipx-filter="">All IP <span><%= items.length %></span></button>
+      <% cats.forEach(function (c) { %>
+        <button class="ipx__chip" data-ipx-filter="<%= c %>" style="--c:<%= colorOf(c) %>"><i></i><%= c %> <span><%= items.filter(function (it) { return (it.category || 'Other').trim() === c; }).length %></span></button>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <div class="ipx__grid">
+      <div class="ipx__floor" data-reveal>
+        <svg class="ipx__svg" viewBox="0 0 520 520" role="img" aria-label="SoC floorplan showing the IP blocks" data-ipx-svg data-core="<%= s.coreLabel || 'AI COMPUTE' %>"></svg>
+        <span class="ipx__hint"><%- h.icon('target') %>Hover or tap a block</span>
+      </div>
+
+      <div class="ipx__panels" data-reveal>
+        <% items.forEach(function (it, i) {
+             const feats = String(it.features || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
+             const dels = h.csv(it.deliverables); %>
+          <article class="ipcard<%= i === 0 ? ' is-active' : '' %>" data-ipx-item data-short="<%= it.short || it.name %>" data-cat="<%= (it.category || 'Other').trim() %>" data-rate="<%= it.rate %>" style="--c:<%= colorOf(it.category) %>" <%- i === 0 ? '' : 'hidden' %>>
+            <div class="ipcard__top">
+              <span class="ipcard__cat"><i></i><%= it.category %></span>
+              <% if (it.status) { %><span class="ipcard__status"><%= it.status %></span><% } %>
+              <span class="ipcard__timer" aria-hidden="true"><i data-ipx-timer></i></span>
+            </div>
+            <h3 class="ipcard__title"><%= it.name %></h3>
+            <% if (it.spec) { %><p class="ipcard__spec"><%= it.spec %></p><% } %>
+            <% if (it.rate) { %>
+              <div class="ipcard__rate"><b><%= it.rate %></b><span><%= it.rateLabel || 'max data rate' %></span></div>
+            <% } %>
+            <% if (it.text) { %><p class="ipcard__text"><%- h.fmt(it.text) %></p><% } %>
+            <% if (dels.length) { %>
+              <ul class="ipcard__dels"><% dels.forEach(function (d) { %><li><%- h.icon('check') %><%= d %></li><% }) %></ul>
+            <% } %>
+            <% if (feats.length) { %>
+              <ul class="ipcard__feats"><% feats.forEach(function (f) { %><li><%= f %></li><% }) %></ul>
+            <% } %>
+            <% if (it.nodes) { %><p class="ipcard__nodes"><%- h.icon('wafer') %>Process nodes: <b><%= it.nodes %></b></p><% } %>
+          </article>
+        <% }) %>
+        <% if (items.length > 1) { %>
+        <div class="ipx__nav">
+          <button class="ipx__arrow" data-ipx-prev aria-label="Previous IP"><%- h.icon('arrow') %></button>
+          <span class="ipx__count"><b data-ipx-count>01</b> / <%= h.pad(items.length) %></span>
+          <button class="ipx__arrow" data-ipx-next aria-label="Next IP"><%- h.icon('arrow') %></button>
+        </div>
+        <% } %>
+      </div>
+    </div>
+
+    <% if ((s.services || []).length) { %>
+      <% if (s.servicesTitle) { %><h3 class="ipx__svc-title" data-reveal><%= s.servicesTitle %></h3><% } %>
+      <div class="ipx__services">
+        <% s.services.forEach(function (sv, i) { %>
+          <div class="ipx__svc" data-spot data-reveal style="--d:<%= i * 0.07 %>s">
+            <span class="ipx__svc-icon"><%- h.icon(sv.icon) %></span>
+            <h4><%= sv.title %></h4>
+            <p><%= sv.text %></p>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <% if (s.ctaLabel) { %>
+      <div class="center-cta" data-reveal><a class="btn btn--primary btn--lg" data-magnetic href="<%= h.url(s.ctaLink) %>"><span><%= s.ctaLabel %></span><%- h.icon('arrow') %></a></div>
+    <% } %>
+  </div>
+</section>

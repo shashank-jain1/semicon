@@ -841,6 +841,132 @@ endmodule`;
     });
   }
 
+  // ---------- IP portfolio: SoC floorplan explorer ----------
+  function buildFloorplan(svg, cards) {
+    const n = cards.length;
+    const DIE = [24, 496], CORE = [196, 324];
+    svgEl('rect', { x: DIE[0], y: DIE[0], width: DIE[1] - DIE[0], height: DIE[1] - DIE[0], rx: 18, class: 'ipx-die' }, svg);
+    svgEl('rect', { x: 32, y: 32, width: 456, height: 456, rx: 13, class: 'ipx-seal' }, svg);
+    for (let p = 44; p <= 476; p += 16) {
+      [[p, 26], [p, 490], [26, p], [490, p]].forEach(([x, y]) => svgEl('rect', { x: x - 2, y: y - 2, width: 4, height: 4, class: 'ipx-pad' }, svg));
+    }
+    // Central compute core + NoC ring
+    svgEl('rect', { x: CORE[0] - 14, y: CORE[0] - 14, width: 156, height: 156, rx: 10, class: 'ipx-noc' }, svg);
+    svgEl('rect', { x: CORE[0], y: CORE[0], width: 128, height: 128, rx: 8, class: 'ipx-core' }, svg);
+    for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) {
+      if (r === 2 && c > 0 && c < 4) continue;
+      svgEl('rect', { x: CORE[0] + 12 + c * 21.6, y: CORE[0] + 12 + r * 21.6, width: 16, height: 16, rx: 2, class: 'ipx-cell', style: `animation-delay:${((r * 5 + c) * 0.17) % 2.6}s` }, svg);
+    }
+    const label = svg.dataset.core || 'AI COMPUTE';
+    svgEl('text', { x: 260, y: 263, class: 'ipx-core-t' }, svg).textContent = label;
+    svgEl('text', { x: 260, y: CORE[0] - 20, class: 'ipx-core-s' }, svg).textContent = 'NETWORK-ON-CHIP';
+
+    // Distribute blocks clockwise: top, right, bottom, left (top/bottom take the extras).
+    const base = Math.floor(n / 4), rem = n % 4;
+    const counts = [base + (rem > 0), base + (rem > 2), base + (rem > 1), base];
+    const traces = svgEl('g', {}, svg), blocks = svgEl('g', {}, svg);
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const out = [];
+    let idx = 0;
+    counts.forEach((k, side) => {
+      for (let j = 0; j < k; j++, idx++) {
+        const horiz = side === 0 || side === 2;
+        const span = horiz ? [40, 480] : [118, 402];
+        const len = (span[1] - span[0] - 10 * (k + 1)) / k;
+        // top: left→right, right: top→bottom, bottom: right→left, left: bottom→top
+        const t = side >= 2 ? k - 1 - j : j;
+        const a = span[0] + 10 + t * (len + 10);
+        let x, y, w, hgt, d;
+        const jog = 146 + (j % 3) * 8;
+        if (side === 0) { x = a; y = 40; w = len; hgt = 64; const cx = x + w / 2; d = `M${cx} 104 V${jog} H${clamp(cx, 212, 308)} V${CORE[0]}`; }
+        if (side === 2) { x = a; y = 416; w = len; hgt = 64; const cx = x + w / 2; d = `M${cx} 416 V${520 - jog} H${clamp(cx, 212, 308)} V${CORE[1]}`; }
+        if (side === 1) { x = 400; y = a; w = 80; hgt = len; const cy = y + hgt / 2; d = `M400 ${cy} H${520 - jog} V${clamp(cy, 212, 308)} H${CORE[1]}`; }
+        if (side === 3) { x = 40; y = a; w = 80; hgt = len; const cy = y + hgt / 2; d = `M120 ${cy} H${jog} V${clamp(cy, 212, 308)} H${CORE[0]}`; }
+        const card = cards[idx];
+        const color = getComputedStyle(card).getPropertyValue('--c').trim() || 'var(--accent)';
+        const tr = svgEl('path', { d, class: 'ipx-trace', style: `--c:${color}` }, traces);
+        const pks = [];
+        if (!reduce) {
+          [0, 1].forEach(q => {
+            const c = svgEl('circle', { r: 2.6, class: 'ipx-pk', style: `--c:${color}` }, traces);
+            const m = svgEl('animateMotion', { dur: `${2.2 + (idx % 3) * 0.4}s`, repeatCount: 'indefinite', begin: `${q * 1.1 + idx * 0.13}s`, path: d, keyPoints: q ? '1;0' : '0;1', keyTimes: '0;1', calcMode: 'linear' }, c);
+            pks.push(c, m);
+          });
+        }
+        const g = svgEl('g', { class: 'ipx-blk', tabindex: 0, role: 'button', 'aria-label': card.querySelector('.ipcard__title')?.textContent || '', style: `--c:${color}` }, blocks);
+        svgEl('rect', { x, y, width: w, height: hgt, rx: 7 }, g);
+        const short = card.dataset.short || '', rate = card.dataset.rate || '';
+        const showRate = rate && (horiz ? rate.length <= 16 : rate.length <= 10);
+        svgEl('text', { x: x + w / 2, y: y + hgt / 2 + (showRate ? -2 : 4), class: 'n' }, g).textContent = short.length > 11 ? short.slice(0, 10) + '…' : short;
+        if (showRate) svgEl('text', { x: x + w / 2, y: y + hgt / 2 + 13, class: 'r' }, g).textContent = rate;
+        out.push({ g, tr, pks: pks.filter(p => p.tagName === 'circle'), card });
+      }
+    });
+    return out;
+  }
+
+  function setupIpx() {
+    $$('[data-ipx]').forEach(sec => {
+      const cards = $$('[data-ipx-item]', sec);
+      if (!cards.length) return;
+      const nodes = buildFloorplan($('[data-ipx-svg]', sec), cards);
+      const chips = $$('[data-ipx-filter]', sec), countEl = $('[data-ipx-count]', sec);
+      const DUR = 5200;
+      let current = -1, filter = '', timer = null, visible = false, userHold = 0;
+      const matches = (i) => !filter || cards[i].dataset.cat === filter;
+      const pool = () => cards.map((_, i) => i).filter(matches);
+
+      function startTimerBar(i) {
+        const bar = $('[data-ipx-timer]', cards[i]);
+        if (!bar) return;
+        bar.style.transition = 'none'; bar.style.width = '0';
+        if (reduce || Date.now() < userHold) return;
+        void bar.offsetWidth;
+        bar.style.transition = `width ${DUR}ms linear`; bar.style.width = '100%';
+      }
+      function select(i) {
+        if (i === current || !cards[i]) return;
+        current = i;
+        cards.forEach((c, k) => { const on = k === i; c.hidden = !on; c.classList.toggle('is-active', on); });
+        nodes.forEach((nd, k) => { nd.g.classList.toggle('is-active', k === i); nd.tr.classList.toggle('is-active', k === i); });
+        if (countEl) countEl.textContent = String(i + 1).padStart(2, '0');
+        startTimerBar(i);
+      }
+      function step(dir) {
+        const p = pool(); if (!p.length) return;
+        const at = p.indexOf(current);
+        select(p[(at + dir + p.length) % p.length]);
+      }
+      function schedule() {
+        clearTimeout(timer);
+        if (reduce) return;
+        timer = setTimeout(() => {
+          if (visible && Date.now() >= userHold) step(1);
+          schedule();
+        }, DUR);
+      }
+      const hold = () => { userHold = Date.now() + 12000; startTimerBar(current); schedule(); };
+
+      nodes.forEach((nd, i) => {
+        nd.g.addEventListener('click', () => { select(i); hold(); });
+        nd.g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(i); hold(); } });
+        if (finePointer) nd.g.addEventListener('pointerenter', () => { if (matches(i)) { select(i); hold(); } });
+      });
+      $('[data-ipx-prev]', sec)?.addEventListener('click', () => { step(-1); hold(); });
+      $('[data-ipx-next]', sec)?.addEventListener('click', () => { step(1); hold(); });
+      chips.forEach(chip => chip.addEventListener('click', () => {
+        filter = chip.dataset.ipxFilter;
+        chips.forEach(c => c.classList.toggle('is-active', c === chip));
+        nodes.forEach((nd, i) => { const dim = !matches(i); nd.g.classList.toggle('is-dim', dim); nd.tr.classList.toggle('is-dim', dim); nd.pks.forEach(p => p.classList.toggle('is-dim', dim)); });
+        if (!matches(current)) { const p = pool(); current = -1; select(p[0]); }
+        hold();
+      }));
+      new IntersectionObserver(([en]) => { visible = en.isIntersecting; }, { threshold: 0.2 }).observe(sec);
+      select(0);
+      schedule();
+    });
+  }
+
   // ---------- Testimonials ----------
   function setupQuotes() {
     $$('[data-quotes]').forEach(wrap => {
@@ -974,6 +1100,7 @@ endmodule`;
   setupTerminal();
   setupEdaFlow();
   setupEdaSuite();
+  setupIpx();
   setupQuotes();
   setupAccordion();
   setupForms();
