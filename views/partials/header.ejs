@@ -1,0 +1,44 @@
+<% if (site.announceEnabled && site.announceText) { %>
+<div class="announce" data-announce>
+  <a href="<%= h.url(site.announceLink) %>" class="announce__link">
+    <span class="announce__tag">New</span>
+    <span class="announce__text"><%= site.announceText %></span>
+    <%- h.icon('arrow', 'ico announce__arrow') %>
+  </a>
+  <button class="announce__close" aria-label="Dismiss announcement" data-announce-close>&times;</button>
+</div>
+<% } %>
+<header class="hdr" data-header>
+  <div class="container hdr__inner">
+    <%- include('logo', { logoId: 'hdr' }) %>
+    <nav class="nav" aria-label="Main">
+      <% (site.nav || []).forEach(function (l) { %>
+        <a class="nav__link" href="<%= h.url(l.href) %>"><span data-text="<%= l.label %>"><%= l.label %></span></a>
+      <% }) %>
+    </nav>
+    <div class="hdr__actions">
+      <% if (site.navCtaLabel) { %>
+        <a class="btn btn--sm btn--primary hdr__cta" data-magnetic href="<%= h.url(site.navCtaLink) %>"><span><%= site.navCtaLabel %></span></a>
+      <% } %>
+      <button class="burger" aria-label="Open menu" aria-expanded="false" data-burger><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="menu" data-menu aria-hidden="true">
+  <div class="menu__bg"></div>
+  <div class="container menu__inner">
+    <nav class="menu__nav">
+      <% (site.nav || []).forEach(function (l, i) { %>
+        <a class="menu__link" href="<%= h.url(l.href) %>"><small><%= h.pad(i + 1) %></small><span><%= l.label %></span></a>
+      <% }) %>
+      <% if (site.navCtaLabel) { %>
+        <a class="menu__link menu__link--cta" href="<%= h.url(site.navCtaLink) %>"><small>→</small><span><%= site.navCtaLabel %></span></a>
+      <% } %>
+    </nav>
+    <div class="menu__foot">
+      <% if (site.email) { %><a href="mailto:<%= site.email %>"><%= site.email %></a><% } %>
+      <% if (site.phone) { %><a href="tel:<%= site.phone.replace(/[^+\d]/g, '') %>"><%= site.phone %></a><% } %>
+    </div>
+  </div>
+</div>

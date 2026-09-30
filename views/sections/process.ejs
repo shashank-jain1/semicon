@@ -1,0 +1,27 @@
+<% const steps = s.steps || []; %>
+<section class="process" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %> data-process>
+  <div class="process__pin">
+    <div class="container process__head">
+      <%- include('../partials/sectionHead', { s: s, split: true }) %>
+      <div class="process__counter"><span data-process-count>01</span><i></i><%= h.pad(steps.length) %></div>
+    </div>
+    <div class="process__viewport">
+      <div class="process__track" data-process-track>
+        <div class="process__rail" aria-hidden="true"><i data-process-rail></i></div>
+        <% steps.forEach(function (st, i) { %>
+          <article class="step" data-step>
+            <div class="step__node"><span></span></div>
+            <span class="step__num"><%= h.pad(i + 1) %></span>
+            <h3 class="step__title"><%= st.title %></h3>
+            <% if (st.meta) { %><p class="step__meta"><%= st.meta %></p><% } %>
+            <p class="step__text"><%= st.text %></p>
+          </article>
+        <% }) %>
+        <div class="step step--end" aria-hidden="true">
+          <div class="step__chip"><%- h.icon('cpu') %></div>
+          <span>First silicon</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

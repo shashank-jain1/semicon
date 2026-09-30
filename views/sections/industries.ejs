@@ -1,0 +1,19 @@
+<section class="sec industries" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %> data-industries>
+  <div class="container">
+    <%- include('../partials/sectionHead', { s: s }) %>
+    <ul class="ind">
+      <% (s.items || []).forEach(function (it, i) { %>
+        <li class="ind__row" data-ind-row data-reveal>
+          <span class="ind__fill" aria-hidden="true"></span>
+          <span class="ind__num"><%= h.pad(i + 1) %></span>
+          <span class="ind__icon"><%- h.icon(it.icon) %></span>
+          <h3 class="ind__title"><%= it.title %></h3>
+          <p class="ind__text"><%= it.text %></p>
+          <span class="ind__arrow"><%- h.icon('arrowUpRight') %></span>
+          <template data-ind-icon><%- h.icon(it.icon) %></template>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+  <div class="ind__follower" aria-hidden="true" data-ind-follower></div>
+</section>

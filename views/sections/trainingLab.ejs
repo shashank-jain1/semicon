@@ -1,0 +1,41 @@
+<% const lines = (s.lines || []).map(function (l) { return l.text; }).filter(Boolean); %>
+<section class="sec lab" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container lab__grid">
+    <div class="lab__text">
+      <% if (s.eyebrow) { %><span class="eyebrow" data-reveal><i></i><%= s.eyebrow %></span><% } %>
+      <% if (s.heading) { %><h2 class="h2" data-split><%- h.fmt(s.heading) %></h2><% } %>
+      <div class="rich" data-reveal><%- s.body %></div>
+      <% if ((s.points || []).length) { %>
+      <ul class="checks">
+        <% s.points.forEach(function (p, i) { %><li data-reveal style="--d:<%= i * 0.06 %>s"><%- h.icon('check') %><span><%= p.text %></span></li><% }) %>
+      </ul>
+      <% } %>
+      <% if (s.ctaLabel) { %><a class="btn btn--primary" data-magnetic data-reveal href="<%= h.url(s.ctaLink) %>"><span><%= s.ctaLabel %></span><%- h.icon('arrow') %></a><% } %>
+    </div>
+
+    <div class="term" data-terminal data-reveal>
+      <div class="term__bar">
+        <span class="term__dots"><i></i><i></i><i></i></span>
+        <span class="term__title"><%= s.consoleTitle %></span>
+        <span class="term__live"><i></i>LIVE</span>
+      </div>
+      <div class="term__body">
+        <pre class="term__log" data-term-log></pre>
+        <script type="application/json" data-term-lines><%- JSON.stringify(lines).replace(/</g, '\\u003c') %></script>
+      </div>
+      <div class="term__metrics">
+        <div><span>Epoch</span><b data-m-epoch>00/40</b></div>
+        <div><span>Loss</span><b data-m-loss>—</b></div>
+        <div><span>Accuracy</span><b data-m-acc>—</b></div>
+        <div><span>Throughput</span><b data-m-tp>—</b></div>
+      </div>
+      <div class="term__chart">
+        <canvas data-term-chart></canvas>
+        <div class="term__legend"><span class="lg-loss">loss</span><span class="lg-acc">accuracy</span></div>
+      </div>
+      <div class="term__gpus">
+        <% for (let g = 0; g < 8; g++) { %><div class="gpu"><span>GPU<%= g %></span><i><b data-gpu></b></i></div><% } %>
+      </div>
+    </div>
+  </div>
+</section>

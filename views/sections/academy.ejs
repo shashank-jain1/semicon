@@ -1,0 +1,30 @@
+<section class="sec academy" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container">
+    <%- include('../partials/sectionHead', { s: s, split: true }) %>
+    <div class="courses">
+      <% (s.courses || []).forEach(function (c, i) { %>
+        <article class="course" data-spot data-reveal style="--d:<%= (i % 3) * 0.08 %>s">
+          <span class="course__ring" aria-hidden="true"></span>
+          <div class="course__inner">
+            <div class="course__head">
+              <span class="level level--<%= String(c.level || '').toLowerCase().replace(/[^a-z]/g, '') %>"><%= c.level %></span>
+              <span class="course__dur"><%- h.icon('clock') %><%= c.duration %></span>
+            </div>
+            <h3 class="course__title"><%= c.title %></h3>
+            <p class="course__text"><%= c.text %></p>
+            <% const topics = h.csv(c.topics); if (topics.length) { %>
+              <ul class="tags"><% topics.forEach(function (t) { %><li><%= t %></li><% }) %></ul>
+            <% } %>
+            <div class="course__foot">
+              <span class="course__mode"><%- h.icon('graduation') %><%= c.mode %></span>
+              <span class="course__go"><%- h.icon('arrowUpRight') %></span>
+            </div>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+    <% if (s.ctaLabel) { %>
+      <div class="center-cta" data-reveal><a class="btn btn--primary btn--lg" data-magnetic href="<%= h.url(s.ctaLink) %>"><span><%= s.ctaLabel %></span><%- h.icon('arrow') %></a></div>
+    <% } %>
+  </div>
+</section>

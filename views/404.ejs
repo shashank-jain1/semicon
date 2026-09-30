@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<%- include('partials/head') %>
+</head>
+<body class="no-hero" data-cursor="<%= site.showCursor ? 1 : 0 %>" data-smooth="0" data-preloader="0">
+<div class="cursor" aria-hidden="true"><div class="cursor__dot"></div><div class="cursor__ring"><span class="cursor__label"></span></div></div>
+<div class="bg-grid" aria-hidden="true"></div>
+<%- include('partials/header') %>
+<main id="main">
+  <section class="sec notfound">
+    <div class="container">
+      <span class="eyebrow"><i></i>Error 404</span>
+      <h1 class="notfound__code" data-scramble-in>404</h1>
+      <h2 class="h2">This signal path is <span class="grad">open</span>.</h2>
+      <p class="lead">The page you’re looking for doesn’t exist or has moved.</p>
+      <a class="btn btn--primary" href="/" data-magnetic><span>Back to home</span></a>
+    </div>
+  </section>
+</main>
+<%- include('partials/footer') %>
+<script src="/vendor/gsap/gsap.min.js"></script>
+<script src="/vendor/gsap/ScrollTrigger.min.js"></script>
+<script src="/vendor/gsap/SplitText.min.js"></script>
+<script src="/vendor/gsap/ScrambleTextPlugin.min.js"></script>
+<script src="/vendor/lenis/lenis.min.js"></script>
+<script src="/assets/js/site.js"></script>
+</body>
+</html>

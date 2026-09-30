@@ -1,0 +1,15 @@
+<% const items = (s.items || []).filter(function (x) { return x.text; }); %>
+<% if (items.length) { %>
+<section class="marquee marquee--<%= s.style || 'outline' %>" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %> aria-label="<%= items.map(function (x) { return x.text; }).join(', ') %>">
+  <div class="marquee__track" data-marquee>
+    <% for (let g = 0; g < 2; g++) { %>
+    <div class="marquee__group" <%- g ? 'aria-hidden="true"' : '' %>>
+      <% items.forEach(function (it) { %>
+        <span class="marquee__item"><%= it.text %></span>
+        <span class="marquee__sep"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9.5" y="9.5" width="5" height="5"/></svg></span>
+      <% }) %>
+    </div>
+    <% } %>
+  </div>
+</section>
+<% } %>

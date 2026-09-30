@@ -1,0 +1,6 @@
+<section class="sec embed" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container">
+    <% if (s.eyebrow || s.heading) { %><%- include('../partials/sectionHead', { s: s }) %><% } %>
+    <div class="embed__body"><%- s.html %></div>
+  </div>
+</section>

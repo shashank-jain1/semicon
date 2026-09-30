@@ -1,0 +1,34 @@
+<section class="sec services" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container">
+    <%- include('../partials/sectionHead', { s: s, split: true }) %>
+    <div class="bento">
+      <% (s.items || []).forEach(function (it, i) {
+           const Tag = it.link ? 'a' : 'article'; %>
+        <<%= Tag %> class="svc<%= it.featured ? ' svc--wide' : '' %>" data-tilt data-spot data-reveal style="--d:<%= (i % 3) * 0.08 %>s" <% if (it.link) { %>href="<%= h.url(it.link) %>"<% } %>>
+          <span class="svc__border" aria-hidden="true"></span>
+          <% if (it.featured) { %>
+          <svg class="svc__art" viewBox="0 0 200 200" aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-width="1">
+              <rect x="60" y="60" width="80" height="80" rx="8"/>
+              <rect x="80" y="80" width="40" height="40" rx="3" class="svc__art-core"/>
+              <path class="svc__trace" d="M100 60V20h60M100 140v40H40M60 100H20v-60M140 100h40v60M75 60V35H40M125 140v25h35M60 125H35v35M140 75h25V35"/>
+            </g>
+          </svg>
+          <% } %>
+          <div class="svc__top">
+            <span class="svc__icon"><%- h.icon(it.icon) %></span>
+            <span class="svc__num"><%= h.pad(i + 1) %></span>
+          </div>
+          <div class="svc__body">
+            <h3 class="svc__title"><%= it.title %></h3>
+            <p class="svc__text"><%= it.text %></p>
+            <% const tags = h.csv(it.tags); if (tags.length) { %>
+              <ul class="tags"><% tags.forEach(function (t) { %><li><%= t %></li><% }) %></ul>
+            <% } %>
+          </div>
+          <% if (it.link) { %><span class="svc__go"><%- h.icon('arrowUpRight') %></span><% } %>
+        </<%= Tag %>>
+      <% }) %>
+    </div>
+  </div>
+</section>

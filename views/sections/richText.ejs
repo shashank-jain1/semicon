@@ -1,0 +1,9 @@
+<section class="sec rtext rtext--<%= s.align || 'left' %> rtext--<%= s.width || 'narrow' %>" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container">
+    <div class="rtext__inner">
+      <% if (s.eyebrow) { %><span class="eyebrow" data-reveal><i></i><%= s.eyebrow %></span><% } %>
+      <% if (s.heading) { %><h2 class="h2" data-split><%- h.fmt(s.heading) %></h2><% } %>
+      <% if (s.body) { %><div class="rich" data-reveal><%- s.body %></div><% } %>
+    </div>
+  </div>
+</section>

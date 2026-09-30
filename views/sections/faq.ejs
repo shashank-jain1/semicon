@@ -1,0 +1,21 @@
+<section class="sec faq" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container faq__grid">
+    <div class="faq__side">
+      <% if (s.eyebrow) { %><span class="eyebrow" data-reveal><i></i><%= s.eyebrow %></span><% } %>
+      <% if (s.heading) { %><h2 class="h2" data-split><%- h.fmt(s.heading) %></h2><% } %>
+      <% if (site.email) { %><p class="muted" data-reveal>Still curious? <a class="u-link" href="mailto:<%= site.email %>"><%= site.email %></a></p><% } %>
+    </div>
+    <div class="acc" data-acc>
+      <% (s.items || []).forEach(function (it, i) { %>
+        <div class="acc__item" data-reveal>
+          <button class="acc__q" aria-expanded="false" data-acc-btn>
+            <span class="acc__num"><%= h.pad(i + 1) %></span>
+            <span class="acc__text"><%= it.q %></span>
+            <span class="acc__plus" aria-hidden="true"></span>
+          </button>
+          <div class="acc__a"><div><p><%- h.fmt(it.a) %></p></div></div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</section>

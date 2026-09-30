@@ -1,0 +1,18 @@
+<section class="sec itext itext--<%= s.imagePosition || 'right' %>" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container itext__grid">
+    <div class="itext__text">
+      <% if (s.eyebrow) { %><span class="eyebrow" data-reveal><i></i><%= s.eyebrow %></span><% } %>
+      <% if (s.heading) { %><h2 class="h2" data-split><%- h.fmt(s.heading) %></h2><% } %>
+      <% if (s.body) { %><div class="rich" data-reveal><%- s.body %></div><% } %>
+      <% if (s.ctaLabel) { %><a class="btn btn--primary" data-magnetic data-reveal href="<%= h.url(s.ctaLink) %>"><span><%= s.ctaLabel %></span><%- h.icon('arrow') %></a><% } %>
+    </div>
+    <figure class="itext__media" data-reveal data-parallax-wrap>
+      <% if (s.image) { %>
+        <img src="<%= s.image %>" alt="" loading="lazy" data-parallax>
+      <% } else { %>
+        <div class="itext__placeholder"><%- h.icon('cpu') %><span>Add an image in the admin panel</span></div>
+      <% } %>
+      <span class="itext__corner itext__corner--tl"></span><span class="itext__corner itext__corner--br"></span>
+    </figure>
+  </div>
+</section>

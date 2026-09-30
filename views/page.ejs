@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<%- include('partials/head') %>
+</head>
+<%
+  const visible = (page.sections || []).filter(function (x) { return x.visible !== false; });
+  const hasHero = visible.length && visible[0].type === 'hero';
+  const usePreloader = site.showPreloader && isHome && !preview;
+%>
+<body class="<%= hasHero ? 'has-hero' : 'no-hero' %><%= preview ? ' is-preview' : '' %>"
+      data-cursor="<%= site.showCursor ? 1 : 0 %>" data-smooth="<%= site.smoothScroll ? 1 : 0 %>" data-preloader="<%= usePreloader ? 1 : 0 %>">
+
+<% if (usePreloader) { %>
+<div class="preloader" data-preloader-el>
+  <div class="preloader__chip">
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <g class="pl-pins" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M40 10v14M53 10v14M67 10v14M80 10v14M40 96v14M53 96v14M67 96v14M80 96v14M10 40h14M10 53h14M10 67h14M10 80h14M96 40h14M96 53h14M96 67h14M96 80h14"/>
+      </g>
+      <rect class="pl-body" x="24" y="24" width="72" height="72" rx="10" fill="none" stroke="currentColor" stroke-width="2"/>
+      <rect class="pl-core" x="44" y="44" width="32" height="32" rx="4"/>
+    </svg>
+  </div>
+  <div class="preloader__meta">
+    <span class="preloader__label" data-preloader-label>Initialising silicon</span>
+    <span class="preloader__count"><b data-preloader-count>0</b>%</span>
+  </div>
+  <div class="preloader__bar"><i data-preloader-bar></i></div>
+</div>
+<% } %>
+
+<div class="cursor" aria-hidden="true"><div class="cursor__dot"></div><div class="cursor__ring"><span class="cursor__label"></span></div></div>
+<div class="progress" aria-hidden="true"><i data-progress-bar></i></div>
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-noise" aria-hidden="true"></div>
+
+<%- include('partials/header') %>
+
+<main id="main">
+  <% visible.forEach(function (sec, idx) { %>
+    <% if (preview) { %><span class="sec-marker" data-sec="<%= sec.id %>"></span><% } %>
+    <%- include('sections/' + sec.type, { s: sec.data || {}, sec: sec, idx: idx }) %>
+  <% }) %>
+  <% if (!visible.length) { %>
+    <section class="sec"><div class="container"><h2 class="h2">This page has no sections yet.</h2><p class="lead">Add some from the admin panel.</p></div></section>
+  <% } %>
+</main>
+
+<%- include('partials/footer') %>
+
+<script src="/vendor/gsap/gsap.min.js"></script>
+<script src="/vendor/gsap/ScrollTrigger.min.js"></script>
+<script src="/vendor/gsap/SplitText.min.js"></script>
+<script src="/vendor/gsap/ScrambleTextPlugin.min.js"></script>
+<script src="/vendor/lenis/lenis.min.js"></script>
+<script src="/assets/js/site.js"></script>
+<% if (hasHero) { %><script type="module" src="/assets/js/chip3d.js"></script><% } %>
+</body>
+</html>

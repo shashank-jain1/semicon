@@ -1,0 +1,15 @@
+<a class="logo" href="/" aria-label="<%= site.siteName %> home">
+  <% if (site.logoImage) { %>
+    <img class="logo__img" src="<%= site.logoImage %>" alt="<%= site.siteName %>">
+  <% } else { %>
+    <svg class="logo__mark" viewBox="0 0 40 40" aria-hidden="true">
+      <defs><linearGradient id="lg-<%= locals.logoId || 'a' %>" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent-2)"/></linearGradient></defs>
+      <g stroke="url(#lg-<%= locals.logoId || 'a' %>)" stroke-width="1.6" stroke-linecap="round" fill="none">
+        <path d="M14 4v5M20 4v5M26 4v5M14 31v5M20 31v5M26 31v5M4 14h5M4 20h5M4 26h5M31 14h5M31 20h5M31 26h5"/>
+        <rect x="9" y="9" width="22" height="22" rx="4"/>
+      </g>
+      <rect class="logo__core" x="15" y="15" width="10" height="10" rx="2" fill="url(#lg-<%= locals.logoId || 'a' %>)"/>
+    </svg>
+    <span class="logo__text"><%= site.logoText || site.siteName %></span>
+  <% } %>
+</a>

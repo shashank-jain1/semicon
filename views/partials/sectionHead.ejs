@@ -1,0 +1,10 @@
+<%
+  const align = locals.align || 'left';
+%>
+<div class="shead shead--<%= align %><%= locals.split ? ' shead--split' : '' %>">
+  <div class="shead__main">
+    <% if (s.eyebrow) { %><span class="eyebrow" data-reveal><i></i><%= s.eyebrow %></span><% } %>
+    <% if (s.heading) { %><h2 class="h2" data-split><%- h.fmt(s.heading) %></h2><% } %>
+  </div>
+  <% if (s.intro) { %><p class="lead shead__intro" data-reveal><%- h.fmt(s.intro) %></p><% } %>
+</div>

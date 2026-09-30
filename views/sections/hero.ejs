@@ -1,0 +1,46 @@
+<%
+  const titleLines = String(s.title || '').split('\n').filter(Boolean);
+  const hud = (s.hud || []).slice(0, 4);
+%>
+<section class="hero" id="<%= sec.anchor || 'top' %>" data-hero>
+  <div class="hero__stage" aria-hidden="true">
+    <canvas class="hero__canvas" data-chip3d data-label="<%= s.chipLabel || 'SFA' %>" data-brand="<%= site.logoText || site.siteName %>"></canvas>
+    <div class="hero__fallback">
+      <div class="css-chip"><div class="css-chip__core"></div></div>
+    </div>
+  </div>
+  <div class="hero__vignette" aria-hidden="true"></div>
+
+  <div class="container hero__inner">
+    <div class="hero__content">
+      <% if (s.eyebrow) { %><span class="pill hero__pill" data-hero-in><span class="pill__dot"></span><%= s.eyebrow %></span><% } %>
+      <h1 class="hero__title">
+        <% titleLines.forEach(function (line) { %><span class="line"><span class="line__inner"><%- h.fmtInline(line) %></span></span><% }) %>
+      </h1>
+      <% if (s.subtitle) { %><p class="hero__sub" data-hero-in><%- h.fmt(s.subtitle) %></p><% } %>
+      <div class="hero__ctas" data-hero-in>
+        <% if (s.primaryLabel) { %><a class="btn btn--primary btn--lg" data-magnetic href="<%= h.url(s.primaryLink) %>"><span><%= s.primaryLabel %></span><%- h.icon('arrow') %></a><% } %>
+        <% if (s.secondaryLabel) { %><a class="btn btn--ghost btn--lg" data-magnetic href="<%= h.url(s.secondaryLink) %>"><span><%= s.secondaryLabel %></span></a><% } %>
+      </div>
+      <% if ((s.badges || []).length) { %>
+      <ul class="hero__badges" data-hero-in>
+        <% s.badges.forEach(function (b) { %><li><%- h.icon('check') %><%= b.text %></li><% }) %>
+      </ul>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="hero__hud" aria-hidden="true">
+    <% hud.forEach(function (it, i) { %>
+      <div class="hud hud--<%= i + 1 %>" data-hud>
+        <span class="hud__line"></span>
+        <span class="hud__label"><%= it.label %></span>
+        <span class="hud__value" data-scramble="<%= it.value %>"><%= it.value %></span>
+      </div>
+    <% }) %>
+  </div>
+
+  <a class="hero__scroll" href="#main" data-scroll-next aria-label="Scroll down">
+    <span>Scroll</span><i></i>
+  </a>
+</section>

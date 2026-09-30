@@ -1,0 +1,29 @@
+<section class="sec cta-sec" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container">
+    <div class="cta" data-cta data-reveal>
+      <svg class="cta__circuit" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+          <path data-draw d="M0 120h180l40 40h160l30-30h140"/>
+          <path data-draw d="M0 380h120l60-60h200l40 40h120"/>
+          <path data-draw d="M1200 90h-220l-50 50H760l-30 30"/>
+          <path data-draw d="M1200 400h-160l-40-40H820l-60 60H640"/>
+          <path data-draw d="M600 0v70l30 30v60"/>
+          <path data-draw d="M760 500v-80l-40-40v-40"/>
+        </g>
+        <g fill="currentColor">
+          <circle cx="550" cy="130" r="4"/><circle cx="640" cy="360" r="4"/><circle cx="730" cy="170" r="4"/><circle cx="630" cy="160" r="4"/><circle cx="720" cy="340" r="4"/><circle cx="500" cy="360" r="4"/>
+        </g>
+      </svg>
+      <div class="cta__orb" data-cta-orb aria-hidden="true"></div>
+      <div class="cta__content">
+        <% if (s.eyebrow) { %><span class="eyebrow eyebrow--light"><i></i><%= s.eyebrow %></span><% } %>
+        <% if (s.heading) { %><h2 class="cta__title" data-split><%- h.fmt(s.heading) %></h2><% } %>
+        <% if (s.text) { %><p class="lead"><%- h.fmt(s.text) %></p><% } %>
+        <div class="cta__btns">
+          <% if (s.buttonLabel) { %><a class="btn btn--white btn--lg" data-magnetic href="<%= h.url(s.buttonLink) %>"><span><%= s.buttonLabel %></span><%- h.icon('arrow') %></a><% } %>
+          <% if (s.secondaryLabel) { %><a class="btn btn--ghost btn--lg" data-magnetic href="<%= h.url(s.secondaryLink) %>"><span><%= s.secondaryLabel %></span></a><% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

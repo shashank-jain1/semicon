@@ -1,0 +1,22 @@
+<section class="sec about" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container">
+    <% if (s.eyebrow) { %><span class="eyebrow" data-reveal><i></i><%= s.eyebrow %></span><% } %>
+    <% if (s.heading) { %><h2 class="about__statement" data-highlight><%- h.fmt(s.heading) %></h2><% } %>
+    <div class="about__grid">
+      <div class="about__body">
+        <% if (s.image) { %><figure class="about__media" data-parallax-wrap><img src="<%= s.image %>" alt="" loading="lazy" data-parallax></figure><% } %>
+        <div class="rich" data-reveal><%- s.body %></div>
+        <% if (s.ctaLabel) { %><a class="link-arrow" data-reveal href="<%= h.url(s.ctaLink) %>"><span><%= s.ctaLabel %></span><%- h.icon('arrow') %></a><% } %>
+      </div>
+      <div class="about__points">
+        <% (s.points || []).forEach(function (p, i) { %>
+          <div class="point" data-reveal data-spot style="--d:<%= i * 0.08 %>s">
+            <span class="point__icon"><%- h.icon(p.icon) %></span>
+            <h3><%= p.title %></h3>
+            <p><%= p.text %></p>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+</section>

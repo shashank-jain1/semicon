@@ -1,0 +1,69 @@
+<% const layers = (s.layers || []).slice(0, 5); %>
+<section class="anatomy" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %> data-anatomy>
+  <div class="anatomy__pin">
+    <div class="container anatomy__grid">
+      <div class="anatomy__text">
+        <% if (s.eyebrow) { %><span class="eyebrow" data-reveal><i></i><%= s.eyebrow %></span><% } %>
+        <% if (s.heading) { %><h2 class="h2" data-split><%- h.fmt(s.heading) %></h2><% } %>
+        <% if (s.intro) { %><p class="lead" data-reveal><%- h.fmt(s.intro) %></p><% } %>
+        <ol class="alayers">
+          <% layers.forEach(function (l, i) { %>
+            <li class="alayer<%= i === 0 ? ' is-active' : '' %>" data-alayer="<%= i %>">
+              <span class="alayer__num"><%= h.pad(i + 1) %></span>
+              <div class="alayer__body">
+                <h3><%= l.name %> <% if (l.spec) { %><em><%= l.spec %></em><% } %></h3>
+                <p><%= l.text %></p>
+              </div>
+            </li>
+          <% }) %>
+        </ol>
+      </div>
+
+      <div class="anatomy__stage" aria-hidden="true">
+        <div class="stack" data-stack>
+          <div class="slab slab--lid" data-slab style="--i:0">
+            <div class="slab__face">
+              <div class="lid-engrave">
+                <span class="lid-engrave__brand"><%= site.logoText || site.siteName %></span>
+                <span class="lid-engrave__model">AI ACCELERATOR</span>
+                <span class="lid-engrave__dot"></span>
+              </div>
+            </div>
+            <span class="slab__tag"><b>01</b><%= (layers[0] || {}).name %></span>
+          </div>
+          <div class="slab slab--die" data-slab style="--i:1">
+            <div class="slab__face">
+              <div class="die-grid"><% for (let c = 0; c < 64; c++) { %><i style="--r:<%= (c * 37) % 17 %>"></i><% } %></div>
+            </div>
+            <span class="slab__tag"><b>02</b><%= (layers[1] || {}).name %></span>
+          </div>
+          <div class="slab slab--hbm" data-slab style="--i:2">
+            <div class="slab__face">
+              <span class="hbm hbm--1"></span><span class="hbm hbm--2"></span>
+              <span class="hbm-core"></span>
+              <span class="hbm hbm--3"></span><span class="hbm hbm--4"></span>
+            </div>
+            <span class="slab__tag"><b>03</b><%= (layers[2] || {}).name %></span>
+          </div>
+          <div class="slab slab--sub" data-slab style="--i:3">
+            <div class="slab__face">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                <g fill="none" stroke-width=".6">
+                  <path d="M50 30V8M44 30V14H20V4M56 30V14h24V4M30 44H10V20M30 56H12v26M70 44h20V20M70 56h18v26M44 70v18H22v8M56 70v18h22v8M50 70v26M30 50H4M70 50h26"/>
+                </g>
+                <rect x="30" y="30" width="40" height="40" rx="2" fill="none" stroke-width=".8"/>
+              </svg>
+            </div>
+            <span class="slab__tag"><b>04</b><%= (layers[3] || {}).name %></span>
+          </div>
+          <div class="slab slab--bga" data-slab style="--i:4">
+            <div class="slab__face"></div>
+            <span class="slab__tag"><b>05</b><%= (layers[4] || {}).name %></span>
+          </div>
+        </div>
+        <div class="anatomy__glow"></div>
+        <div class="anatomy__meter"><span data-anatomy-meter>01</span> / <%= h.pad(layers.length || 5) %></div>
+      </div>
+    </div>
+  </div>
+</section>

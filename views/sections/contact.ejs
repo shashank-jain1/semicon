@@ -1,0 +1,47 @@
+<% const topics = h.csv(s.topics); %>
+<section class="sec contact" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container contact__grid">
+    <div class="contact__info">
+      <% if (s.eyebrow) { %><span class="eyebrow" data-reveal><i></i><%= s.eyebrow %></span><% } %>
+      <% if (s.heading) { %><h2 class="h2" data-split><%- h.fmt(s.heading) %></h2><% } %>
+      <% if (s.text) { %><p class="lead" data-reveal><%- h.fmt(s.text) %></p><% } %>
+      <div class="cinfo">
+        <% if (site.email) { %><a class="cinfo__item" data-reveal href="mailto:<%= site.email %>"><span class="cinfo__ico"><%- h.icon('mail') %></span><span><small>Email</small><%= site.email %></span></a><% } %>
+        <% if (site.phone) { %><a class="cinfo__item" data-reveal href="tel:<%= site.phone.replace(/[^+\d]/g, '') %>"><span class="cinfo__ico"><%- h.icon('phone') %></span><span><small>Phone</small><%= site.phone %></span></a><% } %>
+        <% if (site.address) { %><div class="cinfo__item" data-reveal><span class="cinfo__ico"><%- h.icon('mapPin') %></span><span><small>Office</small><%- h.fmt(site.address) %></span></div><% } %>
+        <% if (site.hours) { %><div class="cinfo__item" data-reveal><span class="cinfo__ico"><%- h.icon('clock') %></span><span><small>Hours</small><%= site.hours %></span></div><% } %>
+      </div>
+    </div>
+
+    <form class="form" data-contact-form data-success="<%= s.successMessage %>" data-reveal novalidate>
+      <% if (topics.length) { %>
+      <fieldset class="form__topics">
+        <legend>I’m interested in</legend>
+        <div class="chips">
+          <% topics.forEach(function (t, i) { %>
+            <label class="chip"><input type="radio" name="topic" value="<%= t %>" <%= i === 0 ? 'checked' : '' %>><span><%= t %></span></label>
+          <% }) %>
+        </div>
+      </fieldset>
+      <% } %>
+      <div class="form__row">
+        <label class="field"><input name="name" required placeholder=" " autocomplete="name"><span>Your name *</span></label>
+        <label class="field"><input name="email" type="email" required placeholder=" " autocomplete="email"><span>Email *</span></label>
+      </div>
+      <div class="form__row">
+        <label class="field"><input name="company" placeholder=" " autocomplete="organization"><span>Company / institution</span></label>
+        <label class="field"><input name="phone" placeholder=" " autocomplete="tel"><span>Phone</span></label>
+      </div>
+      <label class="field field--area"><textarea name="message" rows="5" required placeholder=" "></textarea><span>Tell us about your project *</span></label>
+      <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
+      <div class="form__foot">
+        <button class="btn btn--primary btn--lg" type="submit" data-magnetic><span><%= s.buttonLabel || 'Send' %></span><%- h.icon('arrow') %></button>
+        <p class="form__status" data-form-status role="status"></p>
+      </div>
+      <div class="form__done" data-form-done>
+        <div class="form__done-icon"><%- h.icon('check') %></div>
+        <p></p>
+      </div>
+    </form>
+  </div>
+</section>

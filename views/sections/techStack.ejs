@@ -1,0 +1,13 @@
+<section class="sec stack-sec" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container">
+    <%- include('../partials/sectionHead', { s: s }) %>
+    <div class="stack-grid">
+      <% (s.groups || []).forEach(function (g, i) { %>
+        <div class="stack-group" data-reveal style="--d:<%= (i % 3) * 0.08 %>s">
+          <div class="stack-group__head"><span><%= h.pad(i + 1) %></span><h3><%= g.title %></h3></div>
+          <ul class="pills"><% h.csv(g.items).forEach(function (t) { %><li><%= t %></li><% }) %></ul>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</section>

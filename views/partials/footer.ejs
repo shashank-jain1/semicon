@@ -1,0 +1,39 @@
+<footer class="footer">
+  <div class="footer__glow" aria-hidden="true"></div>
+  <div class="container footer__top">
+    <div class="footer__brand">
+      <%- include('logo', { logoId: 'ftr' }) %>
+      <p><%= site.footerAbout %></p>
+      <% if ((site.socials || []).length) { %>
+      <div class="socials">
+        <% site.socials.forEach(function (so) { if (!so.url) return; %>
+          <a class="social" href="<%= h.url(so.url) %>" target="_blank" rel="noopener" aria-label="<%= so.platform %>" data-magnetic><%- h.icon(so.platform) %></a>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+    <div class="footer__col">
+      <h4>Explore</h4>
+      <% (site.nav || []).forEach(function (l) { %><a href="<%= h.url(l.href) %>"><%= l.label %></a><% }) %>
+    </div>
+    <div class="footer__col">
+      <h4>Contact</h4>
+      <% if (site.email) { %><a href="mailto:<%= site.email %>"><%= site.email %></a><% } %>
+      <% if (site.phone) { %><a href="tel:<%= site.phone.replace(/[^+\d]/g, '') %>"><%= site.phone %></a><% } %>
+      <% if (site.address) { %><p><%- h.fmt(site.address) %></p><% } %>
+      <% if (site.hours) { %><p class="muted"><%= site.hours %></p><% } %>
+    </div>
+    <div class="footer__col footer__col--cta">
+      <h4>Stay in the loop</h4>
+      <p><%= site.tagline %></p>
+      <% if (site.navCtaLabel) { %><a class="btn btn--primary btn--sm" data-magnetic href="<%= h.url(site.navCtaLink) %>"><span><%= site.navCtaLabel %></span><%- h.icon('arrowUpRight') %></a><% } %>
+    </div>
+  </div>
+  <div class="footer__big" aria-hidden="true" data-footer-big>
+    <span class="footer__big-text"><%= site.footerBig || site.siteName %></span>
+  </div>
+  <div class="container footer__bottom">
+    <span><%= h.year(site.copyright) %></span>
+    <button class="to-top" data-to-top>Back to top <%- h.icon('arrow', 'ico to-top__ico') %></button>
+  </div>
+</footer>

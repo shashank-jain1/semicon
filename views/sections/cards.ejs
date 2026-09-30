@@ -1,0 +1,20 @@
+<section class="sec cards-sec" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container">
+    <%- include('../partials/sectionHead', { s: s, split: true }) %>
+    <div class="cgrid cgrid--<%= s.columns || '3' %>">
+      <% (s.items || []).forEach(function (c, i) { %>
+        <article class="ccard" data-spot data-tilt data-reveal style="--d:<%= (i % 4) * 0.07 %>s">
+          <% if (c.image) { %>
+            <div class="ccard__img"><img src="<%= c.image %>" alt="" loading="lazy"></div>
+          <% } else if (c.icon) { %>
+            <span class="ccard__icon"><%- h.icon(c.icon) %></span>
+          <% } %>
+          <% if (c.kicker) { %><span class="ccard__kicker"><%= c.kicker %></span><% } %>
+          <h3 class="ccard__title"><%= c.title %></h3>
+          <% if (c.text) { %><p class="ccard__text"><%- h.fmt(c.text) %></p><% } %>
+          <% if (c.link) { %><a class="link-arrow ccard__link" href="<%= h.url(c.link) %>"><span><%= c.linkLabel || 'Learn more' %></span><%- h.icon('arrow') %></a><% } %>
+        </article>
+      <% }) %>
+    </div>
+  </div>
+</section>

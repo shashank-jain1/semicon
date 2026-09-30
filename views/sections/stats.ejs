@@ -1,0 +1,16 @@
+<section class="sec stats" <% if (sec.anchor) { %>id="<%= sec.anchor %>"<% } %>>
+  <div class="container">
+    <%- include('../partials/sectionHead', { s: s, split: true }) %>
+    <div class="stats__grid">
+      <% (s.items || []).forEach(function (it, i) { %>
+        <div class="stat" data-reveal style="--d:<%= i * 0.08 %>s">
+          <div class="stat__num">
+            <span><%= it.prefix %></span><span data-count="<%= Number(it.value) || 0 %>" data-decimals="<%= Number(it.decimals) || 0 %>"><%= Number(it.value) || 0 %></span><span class="stat__suffix"><%= it.suffix %></span>
+          </div>
+          <p class="stat__label"><%= it.label %></p>
+          <span class="stat__bar"><i></i></span>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</section>

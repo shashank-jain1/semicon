@@ -1,0 +1,23 @@
+<%
+  const pageTitle = page.seoTitle || (isHome ? site.seoTitle : `${page.title} — ${site.siteName}`);
+  const pageDesc = page.seoDescription || site.seoDescription;
+%>
+<meta charset="utf-8">
+<% if (locals.preview && locals.baseHref) { %><base href="<%= baseHref %>"><% } %>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= pageTitle %></title>
+<meta name="description" content="<%= pageDesc %>">
+<meta name="theme-color" content="#04060b">
+<meta property="og:type" content="website">
+<meta property="og:title" content="<%= pageTitle %>">
+<meta property="og:description" content="<%= pageDesc %>">
+<% if (site.ogImage) { %><meta property="og:image" content="<%= site.ogImage %>"><% } %>
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/img/sfa-favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css">
+<style>:root{--accent:<%= site.accent || '#ef3b45' %>;--accent-2:<%= site.accent2 || '#ff8a3d' %>}</style>
+<script type="importmap">{"imports":{"three":"/vendor/three/build/three.module.js","three/addons/":"/vendor/three/addons/"}}</script>
+<script>document.documentElement.classList.add('js');</script>
